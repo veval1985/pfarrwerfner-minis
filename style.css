@@ -2,6 +2,10 @@
   --card-bg: rgba(255,255,255,0.92);
   --card-bg-dark: rgba(20,30,40,0.95);
   --primary: #2f5d50;
+  --secondary: #64748b;
+  --danger: #dc2626;
+  --text: #111827;
+  --muted: #6b7280;
 }
 
 /* BODY */
@@ -10,6 +14,7 @@ body {
   max-width: 720px;
   margin: 24px auto;
   padding: 16px;
+  color: var(--text);
 
   background:
     linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.92)),
@@ -35,20 +40,32 @@ body {
   text-align: center;
 }
 
+.hero-card h1 {
+  margin: 0 0 8px 0;
+  font-size: 26px;
+}
+
 .subtitle {
   color: var(--primary);
   font-weight: 600;
+  margin-bottom: 10px;
 }
 
 .hero-highlight {
   font-style: italic;
   margin-top: 10px;
+  color: #374151;
 }
 
 /* INFO */
 .info-card {
   background: rgba(200, 230, 220, 0.55);
   border-left: 5px solid green;
+}
+
+.info-card ul {
+  margin: 10px 0 0 18px;
+  padding: 0;
 }
 
 /* LABEL */
@@ -68,7 +85,6 @@ body {
   margin-bottom: 8px;
 }
 
-/* LOGIN FORM */
 #loginForm {
   display: flex;
   gap: 8px;
@@ -77,6 +93,14 @@ body {
 
 #loginForm input {
   flex: 1;
+  min-width: 180px;
+}
+
+#error,
+.error-text {
+  color: var(--danger);
+  margin-top: 8px;
+  font-size: 13px;
 }
 
 /* INPUTS */
@@ -90,14 +114,13 @@ input, select {
   transition: all 0.2s ease;
 }
 
-/* FOCUS */
 input:focus,
 select:focus {
-  border-color: #2f5d50;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(47,93,80,0.15);
 }
 
-/* BUTTON */
+/* BUTTONS */
 button {
   padding: 10px 16px;
   border-radius: 14px;
@@ -115,15 +138,18 @@ button:hover {
 }
 
 button.secondary {
-  background: #64748b;
+  background: var(--secondary);
 }
 
 button.danger {
-  background: #dc2626;
+  background: var(--danger);
 }
 
-button:disabled {
-  background: #cbd5e1;
+button:disabled,
+button.disabled {
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
@@ -135,7 +161,7 @@ button:disabled {
   margin-bottom: 12px;
 }
 
-/* SELECT */
+/* MONAT */
 select {
   width: 100%;
   margin-top: 4px;
@@ -162,18 +188,112 @@ select {
   font-size: 20px;
 }
 
+.card-title {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.mini-info {
+  margin-top: 6px;
+}
+
+.mein-mini {
+  font-weight: 700;
+  color: var(--primary);
+}
+
 .warnung {
   margin-top: 10px;
   font-weight: bold;
   color: #dc2626;
 }
 
+.action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* ADMIN STATS */
+.stats-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  padding: 12px;
+  border-radius: 12px;
+  min-width: 130px;
+  background: rgba(255,255,255,0.88);
+}
+
+.stat-card.rot {
+  background: #ffeaea;
+  border: 2px solid red;
+}
+
+.stat-card.gelb {
+  background: #fff7cc;
+  border: 2px solid orange;
+}
+
+.stat-card.gruen {
+  background: #e6ffe6;
+  border: 2px solid green;
+}
+
+.stat-title {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.kind-stat-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #d1d5db;
+  padding: 8px 0;
+}
+
+.kind-stat-row:last-child {
+  border-bottom: none;
+}
+
+/* EMPTY */
+.empty-state {
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 14px;
+}
+
+/* SUCCESS EFFECT */
+@keyframes successFlash {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(34,197,94,0.35); }
+  100% { transform: scale(1); }
+}
+
+.success-effect {
+  animation: successFlash 0.6s ease-out;
+}
+
 /* DARK MODE */
 body.dark {
+  color: white;
   background:
     linear-gradient(rgba(10,15,20,0.9), rgba(10,15,20,0.96)),
     url("./Kirche.jpg");
   background-position: center 75%;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 body.dark .card {
@@ -186,4 +306,30 @@ body.dark select {
   background: #0f172a;
   border: 1px solid #475569;
   color: white;
+}
+
+body.dark .hero-highlight {
+  color: #e5e7eb;
+}
+
+body.dark .mein-mini {
+  color: #b7e4d5;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  #loginForm,
+  .top-bar,
+  .action-row {
+    flex-direction: column;
+  }
+
+  input, select, button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .stats-grid {
+    flex-direction: column;
+  }
 }

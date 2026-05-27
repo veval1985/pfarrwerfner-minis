@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pfarrwerfner Minis</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="card hero-card">
+  <h1>🕊 Pfarrwerfner Minis</h1>
+  <div class="subtitle">Zusammen stark im Glauben</div>
+  <div class="hero-highlight">Hey, du! Ja, genau DU!</div>
+</div>
+
+<!-- INFO -->
+<div class="card info-card">
+  <strong>Warum Ministrant sein?</strong>
+  <ul>
+    <li>✅ Du bist mitten im Gottesdienst dabei</li>
+    <li>✅ Du lernst neue Freunde kennen</li>
+    <li>✅ Du machst die Kirche lebendig</li>
+    <li>✅ Du hast Spaß bei Aktionen & Treffen</li>
+  </ul>
+</div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <button id="darkToggle">🌙 Dark Mode</button>
+  <button id="btnLogout" class="secondary" style="display:none;">Logout</button>
+</div>
+
+<!-- ✅ LOGIN NEU -->
+<div id="loginBox" class="card login-card">
+  <div id="loginStatus">Nicht eingeloggt</div>
+
+  <div id="loginForm">
+    <input id="email" placeholder="E-Mail">
+    <input id="password" type="password" placeholder="Passwort">
+    <button id="btnLogin">Login</button>
+  </div>
+
+  <div id="kindContainer" style="display:none;">
+    <select id="kind">
+      <option value="">👶 Mini auswählen…</option>
+    </select>
+  </div>
+</div>
+
+<!-- MONAT -->
+<div class="card">
+  <label class="label">Monat auswählen:</label>
+  <select id="monat">
+    <option value="2026-01">Jänner</option>
+    <option value="2026-02">Februar</option>
+    <option value="2026-03">März</option>
+    <option value="2026-04">April</option>
+    <option value="2026-05">Mai</option>
+    <option value="2026-06">Juni</option>
+    <option value="2026-07">Juli</option>
+    <option value="2026-08">August</option>
+    <option value="2026-09">September</option>
+    <option value="2026-10">Oktober</option>
+    <option value="2026-11">November</option>
+    <option value="2026-12">Dezember</option>
+  </select>
+</div>
+
+<!-- ADMIN -->
+<div id="adminCreateBox" class="card" style="display:none;">
+  <h3>➕ Neue Messe</h3>
+  <input id="newName" placeholder="z.B. Sonntag, 07.06.2026 - 10:00">
+  <button id="btnCreateMesse">Speichern</button>
+</div>
+
+<!-- LISTE -->
+<div id="liste"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-firestore-compat.min.js"></script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

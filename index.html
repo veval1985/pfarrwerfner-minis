@@ -48,7 +48,9 @@
       <select id="kind">
         <option value="">🕯️ Mini auswählen…</option>
       </select>
-      <div id="kindError" class="error-text" style="display:none;">Bitte zuerst einen Mini auswählen.</div>
+      <div id="kindError" class="error-text" style="display:none;">
+        Bitte zuerst einen Mini auswählen.
+      </div>
     </div>
   </div>
 
@@ -74,7 +76,7 @@
   <!-- SYSTEMMELDUNG -->
   <div id="appMessage" class="empty-state" style="display:none;"></div>
 
-  <!-- ADMIN: Neue Messe -->
+  <!-- ADMIN -->
   <div id="adminCreateBox" class="card" style="display:none;">
     <h3>➕ Neue Messe</h3>
     <input id="newName" type="text" placeholder="z. B. Sonntag, 07.06.2026 - 10:00">
@@ -113,16 +115,17 @@
     <div id="kindStats"></div>
   </div>
 
+  <!-- ✅ FOOTER (WICHTIG – RICHTIG POSITIONIERT) -->
+  <div style="text-align:center; margin-top:20px; font-size:14px;">
+    <a href="datenschutz.html">🕯️ Datenschutzerklärung</a> |
+    <a href="impressum.html">📄 Impressum</a>
+  </div>
+
+  <!-- SCRIPTS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-app-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-auth-compat.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-firestore-compat.min.js"></script>
   <script src="script.js"></script>
-</body>
-  <script src="script.js"></script>
-<div style="text-align:center; margin-top:20px; font-size:14px;">
-  <a href="datenschutz.html">🕯️ Datenschutzerklärung</a>
-</div>
-</body>
-</html>
-</html>
 
+</body>
+</html>

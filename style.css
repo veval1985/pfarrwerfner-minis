@@ -335,13 +335,15 @@ body.dark .mein-mini {
 }
 .footer {
   text-align: center;
-  margin-top: 30px;
-  padding: 15px 10px;
-  font-size: 14px;
-  color: #6b7280;
-  background: rgba(255,255,255,0.7);
-  border-radius: 12px;
-  backdrop-filter: blur(4px);
+  margin-top: 40px;
+  padding: 20px 10px;
+  font-size: 13px;
+  color: rgba(0,0,0,0.6);
+
+  /* WICHTIG: kein voller Block mehr */
+  background: transparent;
+  box-shadow: none;
+  border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 .footer a {
@@ -356,9 +358,18 @@ body.dark .mein-mini {
 
 .footer-separator {
   margin: 0 8px;
-  color: #9ca3af;
+  color: rgba(0,0,0,0.4);
 }
 
+/* Dark Mode */
+body.dark .footer {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.6);
+}
+
+body.dark .footer a {
+  color: #b7e4d5;
+}
 /* Dark Mode */
 body.dark .footer {
   background: rgba(20,30,40,0.8);

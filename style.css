@@ -333,3 +333,38 @@ body.dark .mein-mini {
     flex-direction: column;
   }
 }
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  padding: 15px 10px;
+  font-size: 14px;
+  color: #6b7280;
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+}
+
+.footer a {
+  color: #2f5d50;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-separator {
+  margin: 0 8px;
+  color: #9ca3af;
+}
+
+/* Dark Mode */
+body.dark .footer {
+  background: rgba(20,30,40,0.8);
+  color: #d1d5db;
+}
+
+body.dark .footer a {
+  color: #b7e4d5;
+}

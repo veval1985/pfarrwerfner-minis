@@ -23,7 +23,7 @@
       <li>✅ Du bist mitten im Gottesdienst dabei</li>
       <li>✅ Du lernst neue Freunde kennen</li>
       <li>✅ Du machst die Kirche lebendig</li>
-      <li>✅ Du hast Spaß bei Aktionen & Treffen</li>
+      <li>✅ Du hast Spaß bei Aktionen &amp; Treffen</li>
     </ul>
   </div>
 
@@ -58,12 +58,18 @@
   <div class="card">
     <label class="label" for="monat">Monat auswählen:</label>
     <select id="monat">
-      <!-- wird dynamisch aus vorhandenen Messen aufgebaut -->
+      <!-- wird dynamisch aufgebaut -->
     </select>
   </div>
 
   <!-- SYSTEMMELDUNG -->
   <div id="appMessage" class="empty-state" style="display:none;"></div>
+
+  <!-- REMINDER BANNER -->
+  <div id="reminderBox" class="card" style="display:none;">
+    <span class="reminder-icon">⛪</span>
+    <span class="reminder-text">Nicht vergessen: Du ministrierst morgen!</span>
+  </div>
 
   <!-- ADMIN -->
   <div id="adminCreateBox" class="card" style="display:none;">

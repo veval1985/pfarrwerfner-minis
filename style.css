@@ -68,22 +68,6 @@ body {
   padding: 0;
 }
 
-/* REMINDER */
-.reminder-card {
-  border-left: 6px solid #f59e0b;
-  background: rgba(255, 245, 204, 0.92);
-}
-
-.reminder-title {
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.reminder-text {
-  margin: 0;
-  line-height: 1.5;
-}
-
 /* LABEL */
 .label {
   display: block;
@@ -356,11 +340,6 @@ body.dark .hero-highlight {
 
 body.dark .mein-mini {
   color: #b7e4d5;
-}
-
-body.dark .reminder-card {
-  background: rgba(120, 95, 20, 0.35);
-  border-left-color: #fbbf24;
 }
 
 body.dark .footer {

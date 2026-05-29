@@ -8,13 +8,20 @@
   --muted: #6b7280;
 }
 
-/* BODY */
+html, body {
+  min-height: 100%;
+}
+
 body {
   font-family: "Segoe UI", Arial, sans-serif;
   max-width: 720px;
   margin: 24px auto;
   padding: 16px;
   color: var(--text);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 
   background:
     linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.92)),
@@ -96,7 +103,6 @@ body {
   min-width: 180px;
 }
 
-#error,
 .error-text {
   color: var(--danger);
   margin-top: 8px;
@@ -161,7 +167,7 @@ button.disabled {
   margin-bottom: 12px;
 }
 
-/* MONAT */
+/* SELECT */
 select {
   width: 100%;
   margin-top: 4px;
@@ -285,6 +291,31 @@ select {
   animation: successFlash 0.6s ease-out;
 }
 
+/* FOOTER */
+.footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 15px 10px;
+  font-size: 13px;
+  color: rgba(0,0,0,0.6);
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.footer a {
+  color: #2f5d50;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-separator {
+  margin: 0 8px;
+  color: rgba(0,0,0,0.4);
+}
+
 /* DARK MODE */
 body.dark {
   color: white;
@@ -316,6 +347,15 @@ body.dark .mein-mini {
   color: #b7e4d5;
 }
 
+body.dark .footer {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.6);
+}
+
+body.dark .footer a {
+  color: #b7e4d5;
+}
+
 /* MOBILE */
 @media (max-width: 600px) {
   #loginForm,
@@ -332,50 +372,4 @@ body.dark .mein-mini {
   .stats-grid {
     flex-direction: column;
   }
-}
-.footer {
-  text-align: center;
-  margin-top: 40px;
-  padding: 20px 10px;
-  font-size: 13px;
-  color: rgba(0,0,0,0.6);
-
-  /* WICHTIG: kein voller Block mehr */
-  background: transparent;
-  box-shadow: none;
-  border-top: 1px solid rgba(0,0,0,0.1);
-}
-
-.footer a {
-  color: #2f5d50;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
-
-.footer-separator {
-  margin: 0 8px;
-  color: rgba(0,0,0,0.4);
-}
-
-/* Dark Mode */
-body.dark .footer {
-  border-top: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.6);
-}
-
-body.dark .footer a {
-  color: #b7e4d5;
-}
-/* Dark Mode */
-body.dark .footer {
-  background: rgba(20,30,40,0.8);
-  color: #d1d5db;
-}
-
-body.dark .footer a {
-  color: #b7e4d5;
 }

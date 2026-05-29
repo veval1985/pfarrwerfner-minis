@@ -412,3 +412,42 @@ body.dark #reminderBox {
     flex-direction: column;
   }
 }
+/* REMINDER */
+#reminderBox {
+  display: none;
+  border-left: 6px solid orange;
+  background: linear-gradient(135deg, #fff7cc, #ffe58f);
+  color: #92400e;
+  padding: 14px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  animation: reminderPulse 2s infinite;
+}
+
+@keyframes reminderPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.reminder-icon {
+  font-size: 32px;
+  margin-right: 10px;
+  display: inline-block;
+  animation: bounceIcon 1.5s infinite;
+}
+
+@keyframes bounceIcon {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.reminder-text {
+  font-size: 15px;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  margin-top: 40px;
+}

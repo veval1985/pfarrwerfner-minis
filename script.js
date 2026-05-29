@@ -59,7 +59,7 @@ const adminsOhneKinderwahl = [
 // ---------- Daten ----------
 let messen = [];
 
-// ---------- Helfer ----------
+// ---------- Hilfsfunktionen ----------
 function normalizeMonthKey(value) {
   if (!value) return "";
   return String(value).trim();
@@ -100,7 +100,7 @@ function getSaubereTeilnehmer(teilnehmerRaw) {
     : [];
 }
 
-// ---------- Monatsnamen ----------
+// ---------- Deutsche Monatsnamen ----------
 function germanMonthToNumber(monthName) {
   const map = {
     "jänner": 1,
@@ -122,11 +122,11 @@ function germanMonthToNumber(monthName) {
   return map[String(monthName || "").trim().toLowerCase()] || null;
 }
 
-// ---------- Monat aus Name erkennen ----------
+// ---------- Monat aus Datum im Namen erkennen ----------
 function detectMonthFromName(name) {
   const text = String(name || "").trim();
 
-  // Format: 13.06.2026
+  // 13.06.2026
   const numericMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
   if (numericMatch) {
     const month = String(parseInt(numericMatch[2], 10)).padStart(2, "0");
@@ -134,7 +134,7 @@ function detectMonthFromName(name) {
     return `${year}-${month}`;
   }
 
-  // Format: 13. Juni 2026
+  // 13. Juni 2026
   const germanMatch = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöüß]+)\s+(\d{4})/);
   if (germanMatch) {
     const monthNumber = germanMonthToNumber(germanMatch[2]);
@@ -146,7 +146,7 @@ function detectMonthFromName(name) {
   return null;
 }
 
-// ---------- Monatsschlüssel robust ----------
+// ---------- Monatsschlüssel robust bestimmen ----------
 function getMonthKeyForMass(m) {
   const stored = normalizeMonthKey(m.monat);
   if (stored) return stored;
@@ -167,13 +167,14 @@ function parseDateTimeFromName(name, monatFallback) {
   let hour = 0;
   let minute = 0;
 
+  // Uhrzeit holen
   const timeMatch = text.match(/(\d{1,2}):(\d{2})/);
   if (timeMatch) {
     hour = parseInt(timeMatch[1], 10);
     minute = parseInt(timeMatch[2], 10);
   }
 
-  // 1) 13.06.2026
+  // 1) Format: 13.06.2026
   const numericMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
   if (numericMatch) {
     day = parseInt(numericMatch[1], 10);
@@ -182,7 +183,7 @@ function parseDateTimeFromName(name, monatFallback) {
     return new Date(year, month, day, hour, minute);
   }
 
-  // 2) 13. Juni 2026
+  // 2) Format: 13. Juni 2026
   const germanMatch = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöüß]+)\s+(\d{4})/);
   if (germanMatch) {
     day = parseInt(germanMatch[1], 10);
@@ -195,7 +196,7 @@ function parseDateTimeFromName(name, monatFallback) {
     }
   }
 
-  // Fallback aus monat-Feld
+  // 3) Fallback auf gespeicherten Monat
   if (monatFallback) {
     const parts = String(monatFallback).split("-");
     if (parts.length === 2) {
@@ -207,7 +208,7 @@ function parseDateTimeFromName(name, monatFallback) {
   return new Date(year, month, day, hour, minute);
 }
 
-// ---------- Schönes Datum anzeigen ----------
+// ---------- Datum schön darstellen ----------
 function formatDisplayDate(name, monatFallback) {
   if (!name) return "";
 
@@ -243,52 +244,6 @@ function formatDisplayDate(name, monatFallback) {
   return `${weekday}, ${day}. ${month}`;
 }
 
-// ---------- Dropdown-Monate dynamisch aus Daten bauen ----------
-function syncMonthDropdownWithData() {
-  if (!monatSelect) return;
-
-  const monthKeys = [...new Set(
-    messen
-      .map(m => getMonthKeyForMass(m))
-      .filter(Boolean)
-  )].sort();
-
-  if (monthKeys.length === 0) return;
-
-  const current = monatSelect.value;
-
-  monatSelect.innerHTML = "";
-
-  monthKeys.forEach(key => {
-    const [year, month] = key.split("-");
-    const dateObj = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
-    const monthLabel = new Intl.DateTimeFormat("de-DE", {
-      month: "long"
-    }).format(dateObj);
-    const label = `${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)} ${year}`;
-
-    const option = document.createElement("option");
-    option.value = key;
-    option.textContent = label;
-    monatSelect.appendChild(option);
-  });
-
-  // bisherige Auswahl behalten, sonst aktueller Monat, sonst erster vorhandener
-  if (monthKeys.includes(current)) {
-    monatSelect.value = current;
-    return;
-  }
-
-  const heute = new Date();
-  const defaultKey = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, "0")}`;
-
-  if (monthKeys.includes(defaultKey)) {
-    monatSelect.value = defaultKey;
-  } else {
-    monatSelect.value = monthKeys[0];
-  }
-}
-
 // ---------- Teilnehmerliste ----------
 function renderTeilnehmerListe(teilnehmer) {
   if (!Array.isArray(teilnehmer) || teilnehmer.length === 0) {
@@ -305,6 +260,61 @@ function renderTeilnehmerListe(teilnehmer) {
       return `• ${name}`;
     })
     .join("<br>");
+}
+
+// ---------- Monats-Dropdown dynamisch aus vorhandenen Messen ----------
+function syncMonthDropdownWithData() {
+  if (!monatSelect) return;
+
+  const monthKeys = [...new Set(
+    messen
+      .map(m => getMonthKeyForMass(m))
+      .filter(Boolean)
+  )].sort();
+
+  if (monthKeys.length === 0) {
+    // Fallback: aktueller Monat, falls noch keine Messe existiert
+    const heute = new Date();
+    const defaultKey = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, "0")}`;
+    monatSelect.innerHTML = "";
+    const option = document.createElement("option");
+    option.value = defaultKey;
+    option.textContent = new Intl.DateTimeFormat("de-DE", { month: "long" }).format(heute) + " " + heute.getFullYear();
+    monatSelect.appendChild(option);
+    monatSelect.value = defaultKey;
+    return;
+  }
+
+  const current = monatSelect.value;
+
+  monatSelect.innerHTML = "";
+
+  monthKeys.forEach(key => {
+    const [year, month] = key.split("-");
+    const dateObj = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+    const monthLabel = new Intl.DateTimeFormat("de-DE", {
+      month: "long"
+    }).format(dateObj);
+
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = `${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)} ${year}`;
+    monatSelect.appendChild(option);
+  });
+
+  if (monthKeys.includes(current)) {
+    monatSelect.value = current;
+    return;
+  }
+
+  const heute = new Date();
+  const defaultKey = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, "0")}`;
+
+  if (monthKeys.includes(defaultKey)) {
+    monatSelect.value = defaultKey;
+  } else {
+    monatSelect.value = monthKeys[0];
+  }
 }
 
 // ---------- Reminder ----------
@@ -338,7 +348,6 @@ function checkReminder() {
   morgen.setDate(morgen.getDate() + 1);
 
   const reminderKey = `reminder:${mini}:${morgen.getFullYear()}-${morgen.getMonth() + 1}-${morgen.getDate()}`;
-
   if (reminderAlreadyShown(reminderKey)) return;
 
   const matches = messen.filter((m) => {

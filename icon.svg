@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#2f5d50"/>
+  
+  <!-- Kirche -->
+  <polygon points="256,90 120,200 392,200" fill="white"/>
+  
+  <rect x="150" y="200" width="212" height="180" fill="white"/>
+  
+  <!-- Tür -->
+  <rect x="230" y="260" width="52" height="120" fill="#2f5d50"/>
+  
+  <!-- Kreuz -->
+  <rect x="246" y="60" width="20" height="60" fill="white"/>
+  <rect x="230" y="80" width="52" height="20" fill="white"/>
+  
+  <!-- Fenster -->
+  <circle cx="256" cy="240" r="16" fill="#2f5d50"/>
+</svg>

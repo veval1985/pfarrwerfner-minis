@@ -94,54 +94,104 @@ function showSuccessEffect() {
   }, 600);
 }
 
-// ---------- Monat aus Datumsstring ableiten ----------
-function detectMonthFromName(name) {
-  const text = String(name || "");
-  const match = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-
-  if (!match) return null;
-
-  const month = match[2].padStart(2, "0");
-  const year = match[3];
-  return `${year}-${month}`;
+function getSaubereTeilnehmer(teilnehmerRaw) {
+  return Array.isArray(teilnehmerRaw)
+    ? teilnehmerRaw.filter(name => name && name.trim() !== "")
+    : [];
 }
 
-// ---------- Datum/Uhrzeit aus Name lesen ----------
-function parseDateTimeFromName(name, monatFallback) {
-  const text = String(name || "");
+// ---------- Deutsche Monatsnamen ----------
+function germanMonthToNumber(monthName) {
+  const map = {
+    "jänner": 1,
+    "januar": 1,
+    "februar": 2,
+    "märz": 3,
+    "maerz": 3,
+    "april": 4,
+    "mai": 5,
+    "juni": 6,
+    "juli": 7,
+    "august": 8,
+    "september": 9,
+    "oktober": 10,
+    "november": 11,
+    "dezember": 12
+  };
 
-  let dateMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  let timeMatch = text.match(/(\d{1,2}):(\d{2})/);
+  return map[String(monthName || "").trim().toLowerCase()] || null;
+}
+
+// ---------- Monat aus Text erkennen ----------
+function detectMonthFromName(name) {
+  const text = String(name || "").trim();
+
+  // Format: 13.06.2026
+  let numericMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (numericMatch) {
+    const month = String(parseInt(numericMatch[2], 10)).padStart(2, "0");
+    const year = numericMatch[3];
+    return `${year}-${month}`;
+  }
+
+  // Format: 13. Juni 2026
+  let germanMatch = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöüß]+)\s+(\d{4})/);
+  if (germanMatch) {
+    const monthNumber = germanMonthToNumber(germanMatch[2]);
+    if (monthNumber) {
+      return `${germanMatch[3]}-${String(monthNumber).padStart(2, "0")}`;
+    }
+  }
+
+  return null;
+}
+
+// ---------- Datum/Uhrzeit aus Text lesen ----------
+function parseDateTimeFromName(name, monatFallback) {
+  const text = String(name || "").trim();
 
   let day = 1;
-  let month = 0;
+  let month = 0; // JS 0-basiert
   let year = new Date().getFullYear();
   let hour = 0;
   let minute = 0;
 
-  if (dateMatch) {
-    day = parseInt(dateMatch[1], 10);
-    month = parseInt(dateMatch[2], 10) - 1;
-    year = parseInt(dateMatch[3], 10);
-  } else {
-    if (monatFallback) {
-      const parts = String(monatFallback).split("-");
-      if (parts.length === 2) {
-        year = parseInt(parts[0], 10);
-        month = parseInt(parts[1], 10) - 1;
-      }
-    }
-
-    const shortMatch = text.match(/(\d{1,2})\.(\d{1,2})/);
-    if (shortMatch) {
-      day = parseInt(shortMatch[1], 10);
-      month = parseInt(shortMatch[2], 10) - 1;
-    }
-  }
-
+  // Uhrzeit holen
+  const timeMatch = text.match(/(\d{1,2}):(\d{2})/);
   if (timeMatch) {
     hour = parseInt(timeMatch[1], 10);
     minute = parseInt(timeMatch[2], 10);
+  }
+
+  // 1) DD.MM.YYYY
+  const numericMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (numericMatch) {
+    day = parseInt(numericMatch[1], 10);
+    month = parseInt(numericMatch[2], 10) - 1;
+    year = parseInt(numericMatch[3], 10);
+    return new Date(year, month, day, hour, minute);
+  }
+
+  // 2) DD. Monatsname YYYY
+  const germanMatch = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöüß]+)\s+(\d{4})/);
+  if (germanMatch) {
+    day = parseInt(germanMatch[1], 10);
+    const monthNumber = germanMonthToNumber(germanMatch[2]);
+    year = parseInt(germanMatch[3], 10);
+
+    if (monthNumber) {
+      month = monthNumber - 1;
+      return new Date(year, month, day, hour, minute);
+    }
+  }
+
+  // 3) Fallback aus monat-Feld
+  if (monatFallback) {
+    const parts = String(monatFallback).split("-");
+    if (parts.length === 2) {
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10) - 1;
+    }
   }
 
   return new Date(year, month, day, hour, minute);
@@ -151,54 +201,39 @@ function parseDateTimeFromName(name, monatFallback) {
 function formatDisplayDate(name, monatFallback) {
   if (!name) return "";
 
-  const match = name.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  const dateObj = parseDateTimeFromName(name, monatFallback);
 
-  if (!match) return name;
-
-  const day = parseInt(match[1], 10);
-  const month = parseInt(match[2], 10) - 1; // ✅ wichtig
-  const year = parseInt(match[3], 10);
-
-  const timeMatch = name.match(/(\d{1,2}):(\d{2})/);
-  let hour = 0;
-  let minute = 0;
-
-  if (timeMatch) {
-    hour = parseInt(timeMatch[1], 10);
-    minute = parseInt(timeMatch[2], 10);
+  if (isNaN(dateObj.getTime())) {
+    return name;
   }
-
-  const dateObj = new Date(year, month, day, hour, minute);
 
   const weekday = new Intl.DateTimeFormat("de-DE", {
     weekday: "short"
   }).format(dateObj);
 
-  const formattedDate = new Intl.DateTimeFormat("de-DE", {
-    day: "2-digit",
+  const day = new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit"
+  }).format(dateObj);
+
+  const month = new Intl.DateTimeFormat("de-DE", {
     month: "long"
   }).format(dateObj);
 
-  if (timeMatch) {
+  const hasTime = /(\d{1,2}):(\d{2})/.test(String(name));
+
+  if (hasTime) {
     const time = new Intl.DateTimeFormat("de-DE", {
       hour: "2-digit",
       minute: "2-digit"
     }).format(dateObj);
 
-    return `${weekday}, ${formattedDate} – ${time} Uhr`;
+    return `${weekday}, ${day}. ${month} – ${time} Uhr`;
   }
 
-  return `${weekday}, ${formattedDate}`;
+  return `${weekday}, ${day}. ${month}`;
 }
 
-// ---------- Teilnehmer bereinigen ----------
-function getSaubereTeilnehmer(teilnehmerRaw) {
-  return Array.isArray(teilnehmerRaw)
-    ? teilnehmerRaw.filter(name => name && name.trim() !== "")
-    : [];
-}
-
-// ---------- Teilnehmerliste rendern ----------
+// ---------- Teilnehmerliste ----------
 function renderTeilnehmerListe(teilnehmer) {
   if (!Array.isArray(teilnehmer) || teilnehmer.length === 0) {
     return "Noch niemand eingetragen";
@@ -220,18 +255,16 @@ function renderTeilnehmerListe(teilnehmer) {
 function setDefaultMonthIfNeeded() {
   if (!monatSelect) return;
 
-  const currentValue = monatSelect.value;
-  if (currentValue) return;
-
   const heute = new Date();
   const yyyy = heute.getFullYear();
   const mm = String(heute.getMonth() + 1).padStart(2, "0");
   const defaultKey = `${yyyy}-${mm}`;
 
   const exists = Array.from(monatSelect.options).some(opt => opt.value === defaultKey);
+
   if (exists) {
     monatSelect.value = defaultKey;
-  } else if (monatSelect.options.length > 0) {
+  } else if (monatSelect.options.length > 0 && !monatSelect.value) {
     monatSelect.selectedIndex = 0;
   }
 }
@@ -407,9 +440,7 @@ function anzeigen() {
 
   const selectedMonth = normalizeMonthKey(monatSelect.value);
 
-  let gefiltert = messen.filter((m) => {
-    return normalizeMonthKey(m.monat) === selectedMonth;
-  });
+  let gefiltert = messen.filter((m) => normalizeMonthKey(m.monat) === selectedMonth);
 
   gefiltert = gefiltert.sort((a, b) => {
     const dateA = parseDateTimeFromName(a.name, a.monat).getTime();

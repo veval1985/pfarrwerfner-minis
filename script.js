@@ -1,5 +1,5 @@
 // ---------- Firebase Config ----------
-const firebase {
+const firebaseConfig = {
   apiKey: "AIzaSyC2WkwQIsqDF82_DVp5G6Y2Zzy1HEZthA8",
   authDomain: "ministrantenplaner.firebaseapp.com",
   projectId: "ministrantenplaner",
@@ -38,7 +38,6 @@ const kindStats = document.getElementById("kindStats");
 
 const darkToggle = document.getElementById("darkToggle");
 const appMessage = document.getElementById("appMessage");
-const reminderBox = document.getElementById("reminderBox");
 
 // Admin Create UI
 const adminCreateBox = document.getElementById("adminCreateBox");
@@ -252,59 +251,6 @@ function renderTeilnehmerListe(teilnehmer) {
     .join("<br>");
 }
 
-// ---------- Reminder ----------
-function updateReminder() {
-  if (!reminderBox) return;
-
-  reminderBox.style.display = "none";
-  reminderBox.innerHTML = "";
-
-  const user = auth.currentUser;
-  if (!user) return;
-  if (sollKinderwahlVerstecken(user)) return;
-
-  const selectedMini = kindSelect ? kindSelect.value : "";
-  if (!selectedMini) return;
-
-  const tomorrow = new Date();
-  tomorrow.setHours(0, 0, 0, 0);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const reminders = messen.filter((m) => {
-    const teilnehmer = getSaubereTeilnehmer(m.teilnehmer);
-    if (!teilnehmer.includes(selectedMini)) return false;
-
-    const dateObj = parseDateTimeFromName(m.name, m.monat);
-    if (isNaN(dateObj.getTime())) return false;
-
-    return (
-      dateObj.getFullYear() === tomorrow.getFullYear() &&
-      dateObj.getMonth() === tomorrow.getMonth() &&
-      dateObj.getDate() === tomorrow.getDate()
-    );
-  });
-
-  if (reminders.length === 0) return;
-
-  const reminderText = reminders
-    .map((m) => {
-      const dateObj = parseDateTimeFromName(m.name, m.monat);
-      const time = new Intl.DateTimeFormat("de-DE", {
-        hour: "2-digit",
-        minute: "2-digit"
-      }).format(dateObj);
-
-      return `🕯️ Erinnerung: ${selectedMini} ministriert morgen um ${time} Uhr.`;
-    })
-    .join("<br>");
-
-  reminderBox.innerHTML = `
-    <div class="reminder-title">Erinnerung</div>
-    <p class="reminder-text">${reminderText}</p>
-  `;
-  reminderBox.style.display = "block";
-}
-
 // ---------- Monat initial setzen ----------
 function setDefaultMonthIfNeeded() {
   if (!monatSelect) return;
@@ -323,6 +269,57 @@ function setDefaultMonthIfNeeded() {
   }
 }
 
+// ---------- Reminder ----------
+function reminderAlreadyShown(reminderKey) {
+  try {
+    return localStorage.getItem(reminderKey) === "shown";
+  } catch {
+    return false;
+  }
+}
+
+function markReminderShown(reminderKey) {
+  try {
+    localStorage.setItem(reminderKey, "shown");
+  } catch {
+    // ignore
+  }
+}
+
+function checkReminder() {
+  const user = auth.currentUser;
+  if (!user) return;
+  if (sollKinderwahlVerstecken(user)) return;
+  if (!kindSelect) return;
+
+  const mini = kindSelect.value;
+  if (!mini) return;
+
+  const morgen = new Date();
+  morgen.setHours(0, 0, 0, 0);
+  morgen.setDate(morgen.getDate() + 1);
+
+  const reminderKey = `reminder:${mini}:${morgen.getFullYear()}-${morgen.getMonth() + 1}-${morgen.getDate()}`;
+
+  if (reminderAlreadyShown(reminderKey)) return;
+
+  const matches = messen.filter((m) => {
+    const dateObj = parseDateTimeFromName(m.name, m.monat);
+    return (
+      dateObj.getDate() === morgen.getDate() &&
+      dateObj.getMonth() === morgen.getMonth() &&
+      dateObj.getFullYear() === morgen.getFullYear() &&
+      Array.isArray(m.teilnehmer) &&
+      m.teilnehmer.includes(mini)
+    );
+  });
+
+  if (matches.length > 0) {
+    alert("⛪ Nicht vergessen – du ministrierst morgen!");
+    markReminderShown(reminderKey);
+  }
+}
+
 // ---------- Messen laden ----------
 function startMessenSubscription() {
   db.collection("messen").onSnapshot(
@@ -336,14 +333,15 @@ function startMessenSubscription() {
       setDefaultMonthIfNeeded();
       anzeigen();
       renderStats();
-      updateReminder();
+
+      // Reminder nach Laden neu prüfen
+      setTimeout(checkReminder, 500);
     },
     (error) => {
       console.log("Fehler beim Laden der Messen:", error);
       messen = [];
       anzeigen();
       renderStats();
-      updateReminder();
 
       if (error && error.code === "permission-denied") {
         showMessage("Die Gottesdienste konnten nicht geladen werden. Bitte Firestore-Regeln für 'messen' prüfen.");
@@ -436,16 +434,13 @@ auth.onAuthStateChanged((user) => {
     if (kindError) {
       kindError.style.display = "none";
     }
-
-    if (reminderBox) {
-      reminderBox.style.display = "none";
-      reminderBox.innerHTML = "";
-    }
   }
 
   anzeigen();
   renderStats();
-  updateReminder();
+
+  // Reminder nach Login erneut prüfen
+  setTimeout(checkReminder, 600);
 });
 
 // ---------- Kinder laden ----------
@@ -468,324 +463,11 @@ function ladeKinder(email) {
         kindSelect.selectedIndex = 1;
       }
 
-      updateReminder();
-      anzeigen();
+      // Reminder nach Kinderauswahl initial prüfen
+      setTimeout(checkReminder, 400);
     })
     .catch((error) => {
       console.log("Fehler beim Laden der Kinder:", error);
       showMessage("Die Kinder konnten nicht geladen werden.");
     });
 }
-
-// ---------- Kind holen ----------
-function getName() {
-  const name = kindSelect ? kindSelect.value : "";
-
-  if (!name) {
-    if (kindError) {
-      kindError.style.display = "block";
-    } else {
-      alert("Bitte zuerst einen Mini auswählen.");
-    }
-    return null;
-  }
-
-  if (kindError) {
-    kindError.style.display = "none";
-  }
-
-  return name;
-}
-
-// ---------- Anzeige ----------
-function anzeigen() {
-  if (!liste || !monatSelect) return;
-
-  liste.innerHTML = "";
-
-  const selectedMonth = normalizeMonthKey(monatSelect.value);
-
-  let gefiltert = messen.filter((m) => normalizeMonthKey(m.monat) === selectedMonth);
-
-  gefiltert = gefiltert.sort((a, b) => {
-    const dateA = parseDateTimeFromName(a.name, a.monat).getTime();
-    const dateB = parseDateTimeFromName(b.name, b.monat).getTime();
-    return dateA - dateB;
-  });
-
-  if (gefiltert.length === 0) {
-    liste.innerHTML = '<div class="empty-state">Für diesen Monat sind noch keine Gottesdienste eingetragen.</div>';
-    return;
-  }
-
-  gefiltert.forEach((m) => {
-    const teilnehmer = getSaubereTeilnehmer(m.teilnehmer);
-    const aktuellerMini = kindSelect ? kindSelect.value : "";
-    const miniIstBereitsEingetragen = !!(aktuellerMini && teilnehmer.includes(aktuellerMini));
-
-    const user = auth.currentUser;
-    const istAdmin = isAdminUser(user);
-    const kinderwahlVersteckt = sollKinderwahlVerstecken(user);
-
-    const div = document.createElement("div");
-    div.className = "card";
-
-    if (teilnehmer.length === 0) {
-      div.classList.add("rot");
-    } else if (teilnehmer.length === 1) {
-      div.classList.add("gelb");
-    } else {
-      div.classList.add("gruen");
-    }
-
-    let statusIcon = "✅";
-    if (teilnehmer.length === 0) statusIcon = "❗";
-    if (teilnehmer.length === 1) statusIcon = "⚠️";
-
-    let warnung = "";
-    if (teilnehmer.length === 0) {
-      warnung = '<div class="warnung">🚨 Noch kein Ministrant eingetragen!</div>';
-    } else if (teilnehmer.length === 1) {
-      warnung = '<div class="warnung">⚠️ Noch 1 weiterer Mini wäre gut</div>';
-    }
-
-    div.innerHTML = `
-      <div class="status-badge">${statusIcon}</div>
-      <div class="card-title">${formatDisplayDate(m.name, m.monat)}</div>
-      <div class="mini-info">👥 ${teilnehmer.length} Ministrant${teilnehmer.length === 1 ? "" : "en"}</div>
-      <div class="mini-info mini-list">${renderTeilnehmerListe(teilnehmer)}</div>
-      ${warnung}
-    `;
-
-    const actionRow = document.createElement("div");
-    actionRow.className = "action-row";
-
-    if (user && !kinderwahlVersteckt) {
-      const btnEin = document.createElement("button");
-      btnEin.textContent = "Ich ministriere";
-
-      if (miniIstBereitsEingetragen) {
-        btnEin.disabled = true;
-        btnEin.classList.add("disabled");
-      } else {
-        btnEin.addEventListener("click", () => eintragen(m.id));
-      }
-
-      actionRow.appendChild(btnEin);
-
-      const btnAus = document.createElement("button");
-      btnAus.textContent = "Austragen";
-      btnAus.className = "secondary";
-
-      if (!miniIstBereitsEingetragen) {
-        btnAus.disabled = true;
-        btnAus.classList.add("disabled");
-      } else {
-        btnAus.addEventListener("click", () => austragen(m.id));
-      }
-
-      actionRow.appendChild(btnAus);
-    }
-
-    if (user && istAdmin) {
-      const btnDelete = document.createElement("button");
-      btnDelete.textContent = "Messe löschen";
-      btnDelete.className = "danger";
-      btnDelete.addEventListener("click", () => deleteMesse(m.id, m.name || "diese Messe"));
-      actionRow.appendChild(btnDelete);
-    }
-
-    if (actionRow.children.length > 0) {
-      div.appendChild(actionRow);
-    }
-
-    liste.appendChild(div);
-  });
-}
-
-// ---------- Monat wechseln ----------
-if (monatSelect) {
-  monatSelect.addEventListener("change", () => {
-    anzeigen();
-  });
-}
-
-// ---------- Wenn anderes Kind gewählt wird ----------
-if (kindSelect) {
-  kindSelect.addEventListener("change", () => {
-    anzeigen();
-    updateReminder();
-  });
-}
-
-// ---------- Admin: neue Messe speichern ----------
-if (btnCreateMesse) {
-  btnCreateMesse.addEventListener("click", async () => {
-    const user = auth.currentUser;
-    if (!user || !isAdminUser(user)) return;
-
-    const name = newName ? newName.value.trim() : "";
-
-    if (!name) {
-      alert("Bitte Namen der Messe eingeben.");
-      return;
-    }
-
-    let monat = detectMonthFromName(name);
-
-    if (!monat) {
-      monat = monatSelect ? monatSelect.value : "";
-    }
-
-    if (!monat) {
-      alert("Der Monat konnte nicht erkannt werden.");
-      return;
-    }
-
-    try {
-      await db.collection("messen").add({
-        name: name,
-        monat: monat,
-        teilnehmer: []
-      });
-
-      if (newName) {
-        newName.value = "";
-      }
-
-      showSuccessEffect();
-    } catch (error) {
-      console.log("Fehler beim Speichern der Messe:", error);
-      alert("Fehler beim Speichern der Messe.");
-    }
-  });
-}
-
-// ---------- Admin: Messe löschen ----------
-async function deleteMesse(id, name) {
-  const user = auth.currentUser;
-  if (!user || !isAdminUser(user)) return;
-
-  const confirmDelete = confirm(`Möchtest du "${name}" wirklich löschen?`);
-  if (!confirmDelete) return;
-
-  try {
-    await db.collection("messen").doc(id).delete();
-    showSuccessEffect();
-  } catch (error) {
-    console.log("Fehler beim Löschen der Messe:", error);
-    alert("Fehler beim Löschen der Messe.");
-  }
-}
-
-// ---------- Statistik ----------
-function renderStats() {
-  const user = auth.currentUser;
-  if (!user) return;
-  if (!isAdminUser(user)) return;
-
-  if (!adminStats || !statMessen || !statRot || !statGelb || !statGruen || !kindStats) {
-    return;
-  }
-
-  const bereinigteMessen = messen.map(m => ({
-    ...m,
-    teilnehmer: getSaubereTeilnehmer(m.teilnehmer)
-  }));
-
-  statMessen.textContent = bereinigteMessen.length;
-  statRot.textContent = bereinigteMessen.filter(m => m.teilnehmer.length === 0).length;
-  statGelb.textContent = bereinigteMessen.filter(m => m.teilnehmer.length === 1).length;
-  statGruen.textContent = bereinigteMessen.filter(m => m.teilnehmer.length >= 2).length;
-
-  const count = {};
-
-  bereinigteMessen.forEach((m) => {
-    m.teilnehmer.forEach((n) => {
-      count[n] = (count[n] || 0) + 1;
-    });
-  });
-
-  const sortiert = Object.entries(count).sort((a, b) => b[1] - a[1]);
-
-  if (sortiert.length === 0) {
-    kindStats.innerHTML = '<div class="empty-state">Noch keine Einträge im Jahr.</div>';
-    return;
-  }
-
-  kindStats.innerHTML = sortiert
-    .map(([name, anzahl]) => `
-      <div class="kind-stat-row">
-        <span>${name}</span>
-        <strong>${anzahl}x</strong>
-      </div>
-    `)
-    .join("");
-}
-
-// ---------- Aktionen ----------
-async function eintragen(id) {
-  if (!auth.currentUser) return;
-  if (sollKinderwahlVerstecken(auth.currentUser)) return;
-
-  const name = getName();
-  if (!name) return;
-
-  try {
-    await db.collection("messen").doc(id).update({
-      teilnehmer: firebase.firestore.FieldValue.arrayUnion(name)
-    });
-
-    showSuccessEffect();
-  } catch (error) {
-    console.log("Fehler beim Eintragen:", error);
-    alert("Fehler beim Eintragen: " + error.message);
-  }
-}
-
-async function austragen(id) {
-  if (!auth.currentUser) return;
-  if (sollKinderwahlVerstecken(auth.currentUser)) return;
-
-  const name = getName();
-  if (!name) return;
-
-  try {
-    await db.collection("messen").doc(id).update({
-      teilnehmer: firebase.firestore.FieldValue.arrayRemove(name)
-    });
-
-    showSuccessEffect();
-  } catch (error) {
-    console.log("Fehler beim Austragen:", error);
-    alert("Fehler beim Austragen: " + error.message);
-  }
-}
-
-// ---------- Dark Mode ----------
-if (darkToggle) {
-  const mode = localStorage.getItem("darkMode");
-
-  if (mode === "on") {
-    document.body.classList.add("dark");
-    darkToggle.textContent = "☀️ Light Mode";
-  } else {
-    darkToggle.textContent = "🌙 Dark Mode";
-  }
-
-  darkToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-
-    if (document.body.classList.contains("dark")) {
-      darkToggle.textContent = "☀️ Light Mode";
-      localStorage.setItem("darkMode", "on");
-    } else {
-      darkToggle.textContent = "🌙 Dark Mode";
-      localStorage.setItem("darkMode", "off");
-    }
-  });
-}
-
-// ---------- Start ----------
-setDefaultMonthIfNeeded();
-startMessenSubscription();

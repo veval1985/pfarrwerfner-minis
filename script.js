@@ -255,17 +255,21 @@ function renderTeilnehmerListe(teilnehmer) {
 function setDefaultMonthIfNeeded() {
   if (!monatSelect) return;
 
+  // Wenn User schon was gewählt hat → nichts tun
+  if (monatSelect.value) return;
+
   const heute = new Date();
   const yyyy = heute.getFullYear();
   const mm = String(heute.getMonth() + 1).padStart(2, "0");
-  const defaultKey = `${yyyy}-${mm}`;
 
-  const exists = Array.from(monatSelect.options).some(opt => opt.value === defaultKey);
+  const aktuellerMonat = `${yyyy}-${mm}`;
 
-  if (exists) {
-    monatSelect.value = defaultKey;
-  } else if (monatSelect.options.length > 0 && !monatSelect.value) {
-    monatSelect.selectedIndex = 0;
+  // Wenn aktueller Monat existiert → setzen
+  const optionExists = Array.from(monatSelect.options)
+    .some(opt => opt.value === aktuellerMonat);
+
+  if (optionExists) {
+    monatSelect.value = aktuellerMonat;
   }
 }
 

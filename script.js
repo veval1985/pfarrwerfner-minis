@@ -1,5 +1,5 @@
 // ---------- Firebase Config ----------
-const firebaseConfig = {
+const firebase {
   apiKey: "AIzaSyC2WkwQIsqDF82_DVp5G6Y2Zzy1HEZthA8",
   authDomain: "ministrantenplaner.firebaseapp.com",
   projectId: "ministrantenplaner",
@@ -38,6 +38,7 @@ const kindStats = document.getElementById("kindStats");
 
 const darkToggle = document.getElementById("darkToggle");
 const appMessage = document.getElementById("appMessage");
+const reminderBox = document.getElementById("reminderBox");
 
 // Admin Create UI
 const adminCreateBox = document.getElementById("adminCreateBox");
@@ -251,25 +252,74 @@ function renderTeilnehmerListe(teilnehmer) {
     .join("<br>");
 }
 
+// ---------- Reminder ----------
+function updateReminder() {
+  if (!reminderBox) return;
+
+  reminderBox.style.display = "none";
+  reminderBox.innerHTML = "";
+
+  const user = auth.currentUser;
+  if (!user) return;
+  if (sollKinderwahlVerstecken(user)) return;
+
+  const selectedMini = kindSelect ? kindSelect.value : "";
+  if (!selectedMini) return;
+
+  const tomorrow = new Date();
+  tomorrow.setHours(0, 0, 0, 0);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const reminders = messen.filter((m) => {
+    const teilnehmer = getSaubereTeilnehmer(m.teilnehmer);
+    if (!teilnehmer.includes(selectedMini)) return false;
+
+    const dateObj = parseDateTimeFromName(m.name, m.monat);
+    if (isNaN(dateObj.getTime())) return false;
+
+    return (
+      dateObj.getFullYear() === tomorrow.getFullYear() &&
+      dateObj.getMonth() === tomorrow.getMonth() &&
+      dateObj.getDate() === tomorrow.getDate()
+    );
+  });
+
+  if (reminders.length === 0) return;
+
+  const reminderText = reminders
+    .map((m) => {
+      const dateObj = parseDateTimeFromName(m.name, m.monat);
+      const time = new Intl.DateTimeFormat("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(dateObj);
+
+      return `🕯️ Erinnerung: ${selectedMini} ministriert morgen um ${time} Uhr.`;
+    })
+    .join("<br>");
+
+  reminderBox.innerHTML = `
+    <div class="reminder-title">Erinnerung</div>
+    <p class="reminder-text">${reminderText}</p>
+  `;
+  reminderBox.style.display = "block";
+}
+
 // ---------- Monat initial setzen ----------
 function setDefaultMonthIfNeeded() {
   if (!monatSelect) return;
 
-  // Wenn User schon was gewählt hat → nichts tun
-  if (monatSelect.value) return;
-
   const heute = new Date();
   const yyyy = heute.getFullYear();
   const mm = String(heute.getMonth() + 1).padStart(2, "0");
+  const defaultKey = `${yyyy}-${mm}`;
 
-  const aktuellerMonat = `${yyyy}-${mm}`;
+  const exists = Array.from(monatSelect.options).some(opt => opt.value === defaultKey);
 
-  // Wenn aktueller Monat existiert → setzen
-  const optionExists = Array.from(monatSelect.options)
-    .some(opt => opt.value === aktuellerMonat);
-
-  if (optionExists) {
-    monatSelect.value = aktuellerMonat;
+  if (exists) {
+    monatSelect.value = defaultKey;
+  } else if (monatSelect.options.length > 0 && !monatSelect.value) {
+    monatSelect.selectedIndex = 0;
   }
 }
 
@@ -286,12 +336,14 @@ function startMessenSubscription() {
       setDefaultMonthIfNeeded();
       anzeigen();
       renderStats();
+      updateReminder();
     },
     (error) => {
       console.log("Fehler beim Laden der Messen:", error);
       messen = [];
       anzeigen();
       renderStats();
+      updateReminder();
 
       if (error && error.code === "permission-denied") {
         showMessage("Die Gottesdienste konnten nicht geladen werden. Bitte Firestore-Regeln für 'messen' prüfen.");
@@ -384,10 +436,16 @@ auth.onAuthStateChanged((user) => {
     if (kindError) {
       kindError.style.display = "none";
     }
+
+    if (reminderBox) {
+      reminderBox.style.display = "none";
+      reminderBox.innerHTML = "";
+    }
   }
 
   anzeigen();
   renderStats();
+  updateReminder();
 });
 
 // ---------- Kinder laden ----------
@@ -409,6 +467,9 @@ function ladeKinder(email) {
       if (kindSelect.options.length > 1) {
         kindSelect.selectedIndex = 1;
       }
+
+      updateReminder();
+      anzeigen();
     })
     .catch((error) => {
       console.log("Fehler beim Laden der Kinder:", error);
@@ -553,6 +614,7 @@ if (monatSelect) {
 if (kindSelect) {
   kindSelect.addEventListener("change", () => {
     anzeigen();
+    updateReminder();
   });
 }
 

@@ -8,20 +8,13 @@
   --muted: #6b7280;
 }
 
-html, body {
-  min-height: 100%;
-}
-
+/* BODY */
 body {
   font-family: "Segoe UI", Arial, sans-serif;
   max-width: 720px;
   margin: 24px auto;
   padding: 16px;
   color: var(--text);
-
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
 
   background:
     linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.92)),
@@ -167,7 +160,7 @@ button.disabled {
   margin-bottom: 12px;
 }
 
-/* SELECT */
+/* MONAT */
 select {
   width: 100%;
   margin-top: 4px;
@@ -293,11 +286,13 @@ select {
 
 /* FOOTER */
 .footer {
-  margin-top: auto;
   text-align: center;
-  padding: 15px 10px;
+  margin-top: 40px;
+  padding: 20px 10px;
   font-size: 13px;
   color: rgba(0,0,0,0.6);
+  background: transparent;
+  box-shadow: none;
   border-top: 1px solid rgba(0,0,0,0.1);
 }
 

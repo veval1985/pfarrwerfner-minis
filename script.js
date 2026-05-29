@@ -151,36 +151,44 @@ function parseDateTimeFromName(name, monatFallback) {
 function formatDisplayDate(name, monatFallback) {
   if (!name) return "";
 
-  const dateObj = parseDateTimeFromName(name, monatFallback);
+  const match = name.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
 
-  if (isNaN(dateObj.getTime())) {
-    return name;
+  if (!match) return name;
+
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10) - 1; // ✅ wichtig
+  const year = parseInt(match[3], 10);
+
+  const timeMatch = name.match(/(\d{1,2}):(\d{2})/);
+  let hour = 0;
+  let minute = 0;
+
+  if (timeMatch) {
+    hour = parseInt(timeMatch[1], 10);
+    minute = parseInt(timeMatch[2], 10);
   }
+
+  const dateObj = new Date(year, month, day, hour, minute);
 
   const weekday = new Intl.DateTimeFormat("de-DE", {
     weekday: "short"
   }).format(dateObj);
 
-  const day = new Intl.DateTimeFormat("de-DE", {
-    day: "2-digit"
-  }).format(dateObj);
-
-  const month = new Intl.DateTimeFormat("de-DE", {
+  const formattedDate = new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
     month: "long"
   }).format(dateObj);
 
-  const hasTime = /(\d{1,2}):(\d{2})/.test(String(name));
-
-  if (hasTime) {
+  if (timeMatch) {
     const time = new Intl.DateTimeFormat("de-DE", {
       hour: "2-digit",
       minute: "2-digit"
     }).format(dateObj);
 
-    return `${weekday}, ${day}. ${month} – ${time} Uhr`;
+    return `${weekday}, ${formattedDate} – ${time} Uhr`;
   }
 
-  return `${weekday}, ${day}. ${month}`;
+  return `${weekday}, ${formattedDate}`;
 }
 
 // ---------- Teilnehmer bereinigen ----------

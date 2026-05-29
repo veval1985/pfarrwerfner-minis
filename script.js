@@ -38,6 +38,7 @@ const kindStats = document.getElementById("kindStats");
 
 const darkToggle = document.getElementById("darkToggle");
 const appMessage = document.getElementById("appMessage");
+const reminderBox = document.getElementById("reminderBox");
 
 // Admin Create UI
 const adminCreateBox = document.getElementById("adminCreateBox");
@@ -272,14 +273,20 @@ function syncMonthDropdownWithData() {
       .filter(Boolean)
   )].sort();
 
+  // Falls noch keine Messen da sind -> aktueller Monat als Fallback
   if (monthKeys.length === 0) {
-    // Fallback: aktueller Monat, falls noch keine Messe existiert
     const heute = new Date();
     const defaultKey = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, "0")}`;
+
     monatSelect.innerHTML = "";
     const option = document.createElement("option");
     option.value = defaultKey;
-    option.textContent = new Intl.DateTimeFormat("de-DE", { month: "long" }).format(heute) + " " + heute.getFullYear();
+    option.textContent =
+      new Intl.DateTimeFormat("de-DE", { month: "long" }).format(heute)
+        .replace(/^./, c => c.toUpperCase()) +
+      " " +
+      heute.getFullYear();
+
     monatSelect.appendChild(option);
     monatSelect.value = defaultKey;
     return;
@@ -302,7 +309,7 @@ function syncMonthDropdownWithData() {
     monatSelect.appendChild(option);
   });
 
-  if (monthKeys.includes(current)) {
+  if (monthKeys.includes(current) && current !== "") {
     monatSelect.value = current;
     return;
   }
@@ -317,38 +324,30 @@ function syncMonthDropdownWithData() {
   }
 }
 
-// ---------- Reminder ----------
-function reminderAlreadyShown(reminderKey) {
-  try {
-    return localStorage.getItem(reminderKey) === "shown";
-  } catch {
-    return false;
-  }
-}
-
-function markReminderShown(reminderKey) {
-  try {
-    localStorage.setItem(reminderKey, "shown");
-  } catch {
-    // ignore
-  }
-}
-
+// ---------- Reminder Banner ----------
 function checkReminder() {
   const user = auth.currentUser;
-  if (!user) return;
-  if (sollKinderwahlVerstecken(user)) return;
-  if (!kindSelect) return;
+  if (!user) {
+    if (reminderBox) reminderBox.style.display = "none";
+    return;
+  }
+
+  if (sollKinderwahlVerstecken(user)) {
+    if (reminderBox) reminderBox.style.display = "none";
+    return;
+  }
+
+  if (!kindSelect || !reminderBox) return;
 
   const mini = kindSelect.value;
-  if (!mini) return;
+  if (!mini) {
+    reminderBox.style.display = "none";
+    return;
+  }
 
   const morgen = new Date();
   morgen.setHours(0, 0, 0, 0);
   morgen.setDate(morgen.getDate() + 1);
-
-  const reminderKey = `reminder:${mini}:${morgen.getFullYear()}-${morgen.getMonth() + 1}-${morgen.getDate()}`;
-  if (reminderAlreadyShown(reminderKey)) return;
 
   const matches = messen.filter((m) => {
     const dateObj = parseDateTimeFromName(m.name, getMonthKeyForMass(m));
@@ -362,8 +361,9 @@ function checkReminder() {
   });
 
   if (matches.length > 0) {
-    alert("⛪ Nicht vergessen – du ministrierst morgen!");
-    markReminderShown(reminderKey);
+    reminderBox.style.display = "block";
+  } else {
+    reminderBox.style.display = "none";
   }
 }
 
@@ -380,7 +380,7 @@ function startMessenSubscription() {
       syncMonthDropdownWithData();
       anzeigen();
       renderStats();
-      setTimeout(checkReminder, 500);
+      checkReminder();
     },
     (error) => {
       console.log("Fehler beim Laden der Messen:", error);
@@ -476,11 +476,15 @@ auth.onAuthStateChanged((user) => {
     if (kindError) {
       kindError.style.display = "none";
     }
+
+    if (reminderBox) {
+      reminderBox.style.display = "none";
+    }
   }
 
   anzeigen();
   renderStats();
-  setTimeout(checkReminder, 600);
+  setTimeout(checkReminder, 300);
 });
 
 // ---------- Kinder laden ----------
@@ -503,7 +507,7 @@ function ladeKinder(email) {
         kindSelect.selectedIndex = 1;
       }
 
-      setTimeout(checkReminder, 400);
+      checkReminder();
     })
     .catch((error) => {
       console.log("Fehler beim Laden der Kinder:", error);
@@ -650,7 +654,7 @@ if (monatSelect) {
 if (kindSelect) {
   kindSelect.addEventListener("change", () => {
     anzeigen();
-    setTimeout(checkReminder, 200);
+    checkReminder();
   });
 }
 
@@ -697,7 +701,7 @@ if (btnCreateMesse) {
   });
 }
 
-// ---------- Admin: Messe löschen ----------
+// ---------- Messe löschen ----------
 async function deleteMesse(id, name) {
   const user = auth.currentUser;
   if (!user || !isAdminUser(user)) return;
@@ -773,7 +777,7 @@ async function eintragen(id) {
     });
 
     showSuccessEffect();
-    setTimeout(checkReminder, 200);
+    checkReminder();
   } catch (error) {
     console.log("Fehler beim Eintragen:", error);
     alert("Fehler beim Eintragen: " + error.message);
@@ -793,6 +797,7 @@ async function austragen(id) {
     });
 
     showSuccessEffect();
+    checkReminder();
   } catch (error) {
     console.log("Fehler beim Austragen:", error);
     alert("Fehler beim Austragen: " + error.message);

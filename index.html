@@ -10,6 +10,9 @@
   <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2f5d50">
+
+  <!-- ✅ iPhone Support -->
+  <link rel="apple-touch-icon" href="icon.png">
 </head>
 
 <body>
@@ -28,7 +31,7 @@
       <li>✅ Du bist mitten im Gottesdienst dabei</li>
       <li>✅ Du lernst neue Freunde kennen</li>
       <li>✅ Du machst die Kirche lebendig</li>
-      <li>✅ Du hast Spaß bei Aktionen &amp; Treffen</li>
+      <li>✅ Du hast Spaß bei Aktionen & Treffen</li>
     </ul>
   </div>
 
@@ -50,10 +53,8 @@
     </div>
 
     <div id="kindContainer" style="display:none;">
-      <label class="label">Ministrant auswählen:</label>
-      <select id="kind">
-        <option value="">🕯️ Mini auswählen…</option>
-      </select>
+      <label class="label" for="kind">Ministrant auswählen:</label>
+      <select id="kind"></select>
       <div id="kindError" class="error-text" style="display:none;">
         Bitte zuerst einen Mini auswählen.
       </div>
@@ -67,7 +68,7 @@
   </div>
 
   <!-- REMINDER -->
-  <div id="reminderBox" class="card" style="display:none;">
+  <div id="reminderBox">
     <span class="reminder-icon">⛪</span>
     <span class="reminder-text">Nicht vergessen: Du ministrierst morgen!</span>
   </div>
@@ -79,13 +80,12 @@
     <button id="btnCreateMesse">Speichern</button>
   </div>
 
-  <!-- LISTE -->
   <div id="liste"></div>
 
   <!-- FOOTER -->
   <footer class="footer">
-    <a href="datenschutz.html">Datenschutz</a> |
-    <a href="impressum.html">Impressum</a>
+    <a href="#">Datenschutz</a> |
+    <a href="#">Impressum</a>
   </footer>
 
   <!-- Firebase -->

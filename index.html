@@ -28,7 +28,7 @@
       <li>✅ Du bist mitten im Gottesdienst dabei</li>
       <li>✅ Du lernst neue Freunde kennen</li>
       <li>✅ Du machst die Kirche lebendig</li>
-      <li>✅ Du hast Spaß bei Aktionen & Treffen</li>
+      <li>✅ Du hast Spaß bei Aktionen &amp; Treffen</li>
     </ul>
   </div>
 
@@ -50,7 +50,7 @@
     </div>
 
     <div id="kindContainer" style="display:none;">
-      <label class="label" for="kind">Ministrant auswählen:</label>
+      <label class="label">Ministrant auswählen:</label>
       <select id="kind">
         <option value="">🕯️ Mini auswählen…</option>
       </select>
@@ -62,12 +62,9 @@
 
   <!-- MONAT -->
   <div class="card">
-    <label class="label" for="monat">Monat auswählen:</label>
+    <label class="label">Monat auswählen:</label>
     <select id="monat"></select>
   </div>
-
-  <!-- SYSTEMMELDUNG -->
-  <div id="appMessage" class="empty-state" style="display:none;"></div>
 
   <!-- REMINDER -->
   <div id="reminderBox" class="card" style="display:none;">
@@ -78,46 +75,17 @@
   <!-- ADMIN -->
   <div id="adminCreateBox" class="card" style="display:none;">
     <h3>➕ Neue Messe</h3>
-    <input id="newName" type="text" placeholder="z. B. Sa, 13. Juni 2026 - 19:00 Uhr">
+    <input id="newName" type="text">
     <button id="btnCreateMesse">Speichern</button>
   </div>
 
   <!-- LISTE -->
   <div id="liste"></div>
 
-  <!-- ADMIN STATS -->
-  <div id="adminStats" class="card" style="display:none;">
-    <h3>📊 Jahres-Statistik</h3>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-title">Messen gesamt</div>
-        <div class="stat-value" id="statMessen">0</div>
-      </div>
-
-      <div class="stat-card rot">
-        <div class="stat-title">0 Minis</div>
-        <div class="stat-value" id="statRot">0</div>
-      </div>
-
-      <div class="stat-card gelb">
-        <div class="stat-title">1 Mini</div>
-        <div class="stat-value" id="statGelb">0</div>
-      </div>
-
-      <div class="stat-card gruen">
-        <div class="stat-title">2+ Minis</div>
-        <div class="stat-value" id="statGruen">0</div>
-      </div>
-    </div>
-
-    <div id="kindStats"></div>
-  </div>
-
   <!-- FOOTER -->
   <footer class="footer">
-    <a href="datenschutz.html">🕯️ Datenschutzerklärung</a>
-    <span class="footer-separator">|</span>
-    <a href="impressum.html">📄 Impressum</a>
+    <a href="datenschutz.html">Datenschutz</a> |
+    <a href="impressum.html">Impressum</a>
   </footer>
 
   <!-- Firebase -->
@@ -126,13 +94,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.3.0/firebase-firestore-compat.min.js"></script>
 
   <script src="script.js"></script>
-
-  <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js");
-    }
-  </script>
 
 </body>
 </html>

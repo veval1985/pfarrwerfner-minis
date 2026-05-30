@@ -153,6 +153,12 @@ button.disabled {
   box-shadow: none;
 }
 
+/* INSTALL BUTTON */
+#btnInstall {
+  background: linear-gradient(135deg, #2f5d50, #3c7a6a);
+  color: white;
+}
+
 /* TOP BAR */
 .top-bar {
   display: flex;
@@ -284,7 +290,7 @@ select {
   animation: successFlash 0.6s ease-out;
 }
 
-/* REMINDER BANNER */
+/* ✅ REMINDER – FINAL VERSION */
 #reminderBox {
   display: none;
   border-left: 6px solid orange;
@@ -295,6 +301,7 @@ select {
   border-radius: 14px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.15);
   margin-bottom: 16px;
+
   animation: reminderPulse 2s infinite;
 }
 
@@ -314,7 +321,7 @@ select {
 
 @keyframes bounceIcon {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-5px); }
 }
 
 .reminder-text {
@@ -329,8 +336,6 @@ select {
   padding: 20px 10px;
   font-size: 13px;
   color: rgba(0,0,0,0.6);
-  background: transparent;
-  box-shadow: none;
   border-top: 1px solid rgba(0,0,0,0.1);
 }
 
@@ -344,20 +349,14 @@ select {
   text-decoration: underline;
 }
 
-.footer-separator {
-  margin: 0 8px;
-  color: rgba(0,0,0,0.4);
-}
-
 /* DARK MODE */
 body.dark {
   color: white;
   background:
     linear-gradient(rgba(10,15,20,0.9), rgba(10,15,20,0.96)),
     url("./Kirche.jpg");
-  background-position: center 75%;
   background-size: cover;
-  background-attachment: fixed;
+  background-position: center 75%;
 }
 
 body.dark .card {
@@ -370,23 +369,6 @@ body.dark select {
   background: #0f172a;
   border: 1px solid #475569;
   color: white;
-}
-
-body.dark .hero-highlight {
-  color: #e5e7eb;
-}
-
-body.dark .mein-mini {
-  color: #b7e4d5;
-}
-
-body.dark .footer {
-  border-top: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.6);
-}
-
-body.dark .footer a {
-  color: #b7e4d5;
 }
 
 body.dark #reminderBox {
@@ -411,43 +393,4 @@ body.dark #reminderBox {
   .stats-grid {
     flex-direction: column;
   }
-}
-/* REMINDER */
-#reminderBox {
-  display: none;
-  border-left: 6px solid orange;
-  background: linear-gradient(135deg, #fff7cc, #ffe58f);
-  color: #92400e;
-  padding: 14px;
-  border-radius: 14px;
-  margin-bottom: 16px;
-  animation: reminderPulse 2s infinite;
-}
-
-@keyframes reminderPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-
-.reminder-icon {
-  font-size: 32px;
-  margin-right: 10px;
-  display: inline-block;
-  animation: bounceIcon 1.5s infinite;
-}
-
-@keyframes bounceIcon {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.reminder-text {
-  font-size: 15px;
-}
-
-/* FOOTER */
-.footer {
-  text-align: center;
-  margin-top: 40px;
 }

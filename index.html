@@ -4,15 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pfarrwerfner Minis</title>
-
   <link rel="stylesheet" href="style.css">
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2f5d50">
-  <link rel="apple-touch-icon" href="icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 
 <body>
@@ -38,7 +30,6 @@
   <!-- TOP BAR -->
   <div class="top-bar">
     <button id="darkToggle">🌙 Dark Mode</button>
-    <button id="btnInstall" style="display:none;">📲 App installieren</button>
     <button id="btnLogout" class="secondary" style="display:none;">Logout</button>
   </div>
 
@@ -66,15 +57,13 @@
   <!-- MONAT -->
   <div class="card">
     <label class="label" for="monat">Monat auswählen:</label>
-    <select id="monat">
-      <!-- wird dynamisch aufgebaut -->
-    </select>
+    <select id="monat"></select>
   </div>
 
   <!-- SYSTEMMELDUNG -->
   <div id="appMessage" class="empty-state" style="display:none;"></div>
 
-  <!-- REMINDER BANNER -->
+  <!-- REMINDER -->
   <div id="reminderBox" class="card" style="display:none;">
     <span class="reminder-icon">⛪</span>
     <span class="reminder-text">Nicht vergessen: Du ministrierst morgen!</span>
@@ -84,6 +73,7 @@
   <div id="adminCreateBox" class="card" style="display:none;">
     <h3>➕ Neue Messe</h3>
     <input id="newName" type="text" placeholder="z. B. Sa, 13. Juni 2026 - 19:00 Uhr">
+    <input id="newBemerkung" type="text" placeholder="Zusatzinfo optional (z. B. Prangertag, Beerdigung)">
     <button id="btnCreateMesse">Speichern</button>
   </div>
 

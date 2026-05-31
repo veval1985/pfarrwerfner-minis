@@ -682,11 +682,14 @@ if (btnCreateMesse) {
     }
 
     try {
-      await db.collection("messen").add({
-        name: name,
-        monat: monat,
-        teilnehmer: []
-      });
+     const bemerkung = prompt("Zusatzinfo (optional, z.B. Prangertag, Beerdigung, Firmung):");
+
+await db.collection("messen").add({
+  name: name,
+  monat: monat,
+  bemerkung: bemerkung || "",
+  teilnehmer: []
+});
 
       if (newName) {
         newName.value = "";

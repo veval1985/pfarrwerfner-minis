@@ -591,6 +591,7 @@ function anzeigen() {
     div.innerHTML = `
       <div class="status-badge">${statusIcon}</div>
       <div class="card-title">${formatDisplayDate(m.name, getMonthKeyForMass(m))}</div>
+      ${m.bemerkung ? `<div class="mini-info"><strong>ℹ️ ${m.bemerkung}</strong></div>` : ""}
       <div class="mini-info">👥 ${teilnehmer.length} Ministrant${teilnehmer.length === 1 ? "" : "en"}</div>
       <div class="mini-info mini-list">${renderTeilnehmerListe(teilnehmer)}</div>
       ${warnung}

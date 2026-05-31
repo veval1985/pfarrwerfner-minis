@@ -40,12 +40,10 @@ const darkToggle = document.getElementById("darkToggle");
 const appMessage = document.getElementById("appMessage");
 const reminderBox = document.getElementById("reminderBox");
 
-// Install Button
-const installBtn = document.getElementById("btnInstall");
-
 // Admin Create UI
 const adminCreateBox = document.getElementById("adminCreateBox");
 const newName = document.getElementById("newName");
+const newBemerkung = document.getElementById("newBemerkung");
 const btnCreateMesse = document.getElementById("btnCreateMesse");
 
 // ---------- Admin ----------
@@ -166,7 +164,7 @@ function parseDateTimeFromName(name, monatFallback) {
   const text = String(name || "").trim();
 
   let day = 1;
-  let month = 0; // JS 0-basiert
+  let month = 0;
   let year = new Date().getFullYear();
   let hour = 0;
   let minute = 0;
@@ -177,7 +175,6 @@ function parseDateTimeFromName(name, monatFallback) {
     minute = parseInt(timeMatch[2], 10);
   }
 
-  // 1) Format: 13.06.2026
   const numericMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
   if (numericMatch) {
     day = parseInt(numericMatch[1], 10);
@@ -186,7 +183,6 @@ function parseDateTimeFromName(name, monatFallback) {
     return new Date(year, month, day, hour, minute);
   }
 
-  // 2) Format: 13. Juni 2026
   const germanMatch = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöüß]+)\s+(\d{4})/);
   if (germanMatch) {
     day = parseInt(germanMatch[1], 10);
@@ -199,7 +195,6 @@ function parseDateTimeFromName(name, monatFallback) {
     }
   }
 
-  // 3) Fallback auf gespeicherten Monat
   if (monatFallback) {
     const parts = String(monatFallback).split("-");
     if (parts.length === 2) {
@@ -265,7 +260,7 @@ function renderTeilnehmerListe(teilnehmer) {
     .join("<br>");
 }
 
-// ---------- Monats-Dropdown dynamisch aus vorhandenen Messen ----------
+// ---------- Monats-Dropdown dynamisch ----------
 function syncMonthDropdownWithData() {
   if (!monatSelect) return;
 
@@ -324,7 +319,7 @@ function syncMonthDropdownWithData() {
   }
 }
 
-// ---------- Reminder Banner ----------
+// ---------- Reminder ----------
 function checkReminder() {
   const user = auth.currentUser;
   if (!user) {
@@ -360,11 +355,7 @@ function checkReminder() {
     );
   });
 
-  if (matches.length > 0) {
-    reminderBox.style.display = "block";
-  } else {
-    reminderBox.style.display = "none";
-  }
+  reminderBox.style.display = matches.length > 0 ? "block" : "none";
 }
 
 // ---------- Messen laden ----------
@@ -437,49 +428,25 @@ auth.onAuthStateChanged((user) => {
 
     if (kinderwahlVersteckt) {
       kindContainer.style.display = "none";
-      if (kindSelect) {
-        kindSelect.innerHTML = '<option value="">🕯️ Mini auswählen…</option>';
-      }
-      if (kindError) {
-        kindError.style.display = "none";
-      }
+      kindSelect.innerHTML = '<option value="">🕯️ Mini auswählen…</option>';
+      kindError.style.display = "none";
     } else {
       kindContainer.style.display = "block";
       ladeKinder(user.email);
     }
 
-    if (adminStats) {
-      adminStats.style.display = istAdmin ? "block" : "none";
-    }
-
-    if (adminCreateBox) {
-      adminCreateBox.style.display = istAdmin ? "block" : "none";
-    }
+    adminStats.style.display = istAdmin ? "block" : "none";
+    adminCreateBox.style.display = istAdmin ? "block" : "none";
   } else {
     loginStatus.textContent = "Nicht eingeloggt";
     loginForm.style.display = "flex";
     btnLogout.style.display = "none";
     kindContainer.style.display = "none";
-
-    if (adminStats) {
-      adminStats.style.display = "none";
-    }
-
-    if (adminCreateBox) {
-      adminCreateBox.style.display = "none";
-    }
-
-    if (kindSelect) {
-      kindSelect.innerHTML = '<option value="">🕯️ Mini auswählen…</option>';
-    }
-
-    if (kindError) {
-      kindError.style.display = "none";
-    }
-
-    if (reminderBox) {
-      reminderBox.style.display = "none";
-    }
+    adminStats.style.display = "none";
+    adminCreateBox.style.display = "none";
+    kindSelect.innerHTML = '<option value="">🕯️ Mini auswählen…</option>';
+    kindError.style.display = "none";
+    reminderBox.style.display = "none";
   }
 
   anzeigen();
@@ -517,21 +484,14 @@ function ladeKinder(email) {
 
 // ---------- Kind holen ----------
 function getName() {
-  const name = kindSelect ? kindSelect.value : "";
+  const name = kindSelect.value;
 
   if (!name) {
-    if (kindError) {
-      kindError.style.display = "block";
-    } else {
-      alert("Bitte zuerst einen Mini auswählen.");
-    }
+    kindError.style.display = "block";
     return null;
   }
 
-  if (kindError) {
-    kindError.style.display = "none";
-  }
-
+  kindError.style.display = "none";
   return name;
 }
 
@@ -559,7 +519,7 @@ function anzeigen() {
 
   gefiltert.forEach((m) => {
     const teilnehmer = getSaubereTeilnehmer(m.teilnehmer);
-    const aktuellerMini = kindSelect ? kindSelect.value : "";
+    const aktuellerMini = kindSelect.value;
     const miniIstBereitsEingetragen = !!(aktuellerMini && teilnehmer.includes(aktuellerMini));
 
     const user = auth.currentUser;
@@ -589,13 +549,13 @@ function anzeigen() {
     }
 
     div.innerHTML = `
-  <div class="status-badge">${statusIcon}</div>
-  <div class="card-title">${formatDisplayDate(m.name, getMonthKeyForMass(m))}</div>
-  ${m.bemerkung ? `<div class="mini-info"><strong>ℹ️ ${m.bemerkung}</strong></div>` : ""}
-  <div class="mini-info">👥 ${teilnehmer.length} Ministrant${teilnehmer.length === 1 ? "" : "en"}</div>
-  <div class="mini-info mini-list">${renderTeilnehmerListe(teilnehmer)}</div>
-  ${warnung}
-`;
+      <div class="status-badge">${statusIcon}</div>
+      <div class="card-title">${formatDisplayDate(m.name, getMonthKeyForMass(m))}</div>
+      ${m.bemerkung ? `<div class="bemerkung">ℹ️ ${m.bemerkung}</div>` : ""}
+      <div class="mini-info">👥 ${teilnehmer.length} Ministrant${teilnehmer.length === 1 ? "" : "en"}</div>
+      <div class="mini-info mini-list">${renderTeilnehmerListe(teilnehmer)}</div>
+      ${warnung}
+    `;
 
     const actionRow = document.createElement("div");
     actionRow.className = "action-row";
@@ -628,6 +588,12 @@ function anzeigen() {
     }
 
     if (user && istAdmin) {
+      const btnEdit = document.createElement("button");
+      btnEdit.textContent = "Bearbeiten";
+      btnEdit.className = "secondary";
+      btnEdit.addEventListener("click", () => editMesse(m));
+      actionRow.appendChild(btnEdit);
+
       const btnDelete = document.createElement("button");
       btnDelete.textContent = "Messe löschen";
       btnDelete.className = "danger";
@@ -644,64 +610,87 @@ function anzeigen() {
 }
 
 // ---------- Monat wechseln ----------
-if (monatSelect) {
-  monatSelect.addEventListener("change", () => {
-    anzeigen();
-  });
-}
-
-// ---------- Wenn anderes Kind gewählt wird ----------
-if (kindSelect) {
-  kindSelect.addEventListener("change", () => {
-    anzeigen();
-    checkReminder();
-  });
-}
-
-// ---------- Admin: neue Messe speichern ----------
-if (btnCreateMesse) {
-  btnCreateMesse.addEventListener("click", async () => {
-    const user = auth.currentUser;
-    if (!user || !isAdminUser(user)) return;
-
-    const name = newName ? newName.value.trim() : "";
-
-    if (!name) {
-      alert("Bitte Namen der Messe eingeben.");
-      return;
-    }
-
-    let monat = detectMonthFromName(name);
-
-    if (!monat) {
-      monat = monatSelect ? monatSelect.value : "";
-    }
-
-    if (!monat) {
-      alert("Der Monat konnte nicht erkannt werden.");
-      return;
-    }
-
-    try {
-     const bemerkung = prompt("Zusatzinfo (optional, z.B. Prangertag, Beerdigung, Firmung):");
-
-await db.collection("messen").add({
-  name: name,
-  monat: monat,
-  bemerkung: bemerkung || "",
-  teilnehmer: []
+monatSelect.addEventListener("change", () => {
+  anzeigen();
 });
 
-      if (newName) {
-        newName.value = "";
-      }
+// ---------- Wenn anderes Kind gewählt wird ----------
+kindSelect.addEventListener("change", () => {
+  anzeigen();
+  checkReminder();
+});
 
-      showSuccessEffect();
-    } catch (error) {
-      console.log("Fehler beim Speichern der Messe:", error);
-      alert("Fehler beim Speichern der Messe.");
-    }
-  });
+// ---------- Neue Messe speichern ----------
+btnCreateMesse.addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user || !isAdminUser(user)) return;
+
+  const name = newName.value.trim();
+  const bemerkung = newBemerkung.value.trim();
+
+  if (!name) {
+    alert("Bitte Namen der Messe eingeben.");
+    return;
+  }
+
+  let monat = detectMonthFromName(name);
+  if (!monat) {
+    monat = monatSelect.value || "";
+  }
+
+  if (!monat) {
+    alert("Der Monat konnte nicht erkannt werden.");
+    return;
+  }
+
+  try {
+    await db.collection("messen").add({
+      name: name,
+      monat: monat,
+      bemerkung: bemerkung || "",
+      teilnehmer: []
+    });
+
+    newName.value = "";
+    newBemerkung.value = "";
+    showSuccessEffect();
+  } catch (error) {
+    console.log("Fehler beim Speichern der Messe:", error);
+    alert("Fehler beim Speichern der Messe.");
+  }
+});
+
+// ---------- Messe bearbeiten ----------
+async function editMesse(m) {
+  const user = auth.currentUser;
+  if (!user || !isAdminUser(user)) return;
+
+  const neuerName = prompt("Messe bearbeiten:", m.name || "");
+  if (neuerName === null) return;
+
+  const neueBemerkung = prompt(
+    "Zusatzinfo (optional, z. B. Prangertag, Beerdigung, Firmung):",
+    m.bemerkung || ""
+  );
+  if (neueBemerkung === null) return;
+
+  let neuerMonat = detectMonthFromName(neuerName);
+  if (!neuerMonat) {
+    neuerMonat = getMonthKeyForMass(m);
+  }
+
+  try {
+    await db.collection("messen").doc(m.id).update({
+      name: neuerName.trim(),
+      monat: neuerMonat || "",
+      bemerkung: (neueBemerkung || "").trim()
+    });
+
+    showSuccessEffect();
+  } catch (error) {
+    console.log("Fehler beim Bearbeiten der Messe:", error);
+    alert("Fehler beim Bearbeiten der Messe.");
+  }
 }
 
 // ---------- Messe löschen ----------
@@ -724,12 +713,7 @@ async function deleteMesse(id, name) {
 // ---------- Statistik ----------
 function renderStats() {
   const user = auth.currentUser;
-  if (!user) return;
-  if (!isAdminUser(user)) return;
-
-  if (!adminStats || !statMessen || !statRot || !statGelb || !statGruen || !kindStats) {
-    return;
-  }
+  if (!user || !isAdminUser(user)) return;
 
   const bereinigteMessen = messen.map(m => ({
     ...m,
@@ -742,7 +726,6 @@ function renderStats() {
   statGruen.textContent = bereinigteMessen.filter(m => m.teilnehmer.length >= 2).length;
 
   const count = {};
-
   bereinigteMessen.forEach((m) => {
     m.teilnehmer.forEach((n) => {
       count[n] = (count[n] || 0) + 1;
@@ -829,39 +812,6 @@ if (darkToggle) {
       localStorage.setItem("darkMode", "off");
     }
   });
-}
-
-// ---------- PWA Install Button ----------
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  if (installBtn) {
-    installBtn.style.display = "inline-block";
-  }
-});
-
-if (installBtn) {
-  installBtn.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-
-    const result = await deferredPrompt.userChoice;
-
-    if (result.outcome === "accepted") {
-      installBtn.style.display = "none";
-    }
-
-    deferredPrompt = null;
-  });
-}
-
-// ---------- Service Worker ----------
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
 }
 
 // ---------- Start ----------
